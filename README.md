@@ -69,10 +69,11 @@ An output can be anything you can write data to, like for example:
 * send the data over the network with the protocol of your choice, for example
   MQTT
 
-Currently, the only implemented output plugin is a file writer called
-*datafile*. Output plugins are usually data-specific. I mean, for an output
-plugin to be able to write to an SQL database, you would likely have to create
-a schema and write data-specific SQL queries.
+Currently, the only implemented generic output plugins are a pretty printer
+called *print* and a file writer called *datafile*. Output plugins are usually
+not data-agnostic. I mean, for an output plugin to be able to write to an SQL
+database, you would likely have to create a schema and write data-specific SQL
+queries.
 
 ## Pipeline and data
 
@@ -108,8 +109,10 @@ def run(self):
 ```
 
 * Command line options can be used to change certain parameters, the most
-  important one being the location of the configuration file.
-* The ini-style configuration file contains configuation for the main program
+  important one being the location of the configuration file. But Pyp can be
+  used without a configuration file, with all plugin options on the command line,
+  if you like.
+* The ini-style configuration file contains configuration for the main program
   and all the plugins. This is where the pipeline is defined. This can look,
   for example, like this:
 
@@ -152,7 +155,7 @@ decoders and output plugins. As an illustration, the simplest input plugin
 ```
 
 Plugins are instantiated only once for the lifetime of the Pyp process, which
-means you can use them to temporarily hold intermediate data. The can be
+means you can use them to temporarily hold intermediate data. That can be
 convenient, if you need to buffer a certain amount of data before processing
 it.
 
