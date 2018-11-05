@@ -1,0 +1,5 @@
+#!/usr/bin/python3 -u
+
+import pyp
+app = pyp.app.App()
+app.run()
