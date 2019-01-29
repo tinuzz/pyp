@@ -38,4 +38,10 @@ class Pluginbase(object):
         self.callback = callback
 
 class PluginError(Exception):
-    pass
+
+    def __init__(self, message):
+
+        # Call base class constructor
+        super().__init__(message)
+
+        self.message = message
