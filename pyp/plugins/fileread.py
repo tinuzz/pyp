@@ -43,10 +43,8 @@ class Fileread(Pluginbase):
                 stat_fd = os.stat(f.fileno())
                 stat_fn = os.stat(self.filename)
                 if stat_fd.st_ino != stat_fn.st_ino:
-                    self.filesize = 0
                     raise PluginError('File has been moved.')
                 if stat_fd.st_size < self.filesize:
-                    self.filesize = 0
                     raise PluginError('File has been truncated.')
                 self.filesize = stat_fd.st_size
                 continue
@@ -71,6 +69,7 @@ class Fileread(Pluginbase):
                     break   # only executed when follow == false
                 except PluginError as e:
                     f.close()
+                    self.filesize = 0
                     self.logger.info(e.message)
                 except FileNotFoundError as e:
                     self.logger.critical('File not found: %s' % e)
