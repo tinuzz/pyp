@@ -14,6 +14,8 @@ class Fileread(Pluginbase):
         'retry_reopen': '0',  # if FileNotFoundError on reopen, retry for this many seconds. 0 means 'fail immediately'.
     }
 
+    filesize = 0
+
     def initialize(self):
         # Try to read state from a file. Writing a state file is not implemented yet.
         try:
@@ -38,8 +40,15 @@ class Fileread(Pluginbase):
             if not line:
                 time.sleep(int(self.follow_delay))
                 # If the second stat call raises a FileNotFoundError, run() will handle it.
-                if os.stat(f.fileno()).st_ino != os.stat(self.filename).st_ino:
+                stat_fd = os.stat(f.fileno())
+                stat_fn = os.stat(self.filename)
+                if stat_fd.st_ino != stat_fn.st_ino:
+                    self.filesize = 0
                     raise PluginError('File has been moved.')
+                if stat_fd.st_size < self.filesize:
+                    self.filesize = 0
+                    raise PluginError('File has been truncated.')
+                self.filesize = stat_fd.st_size
                 continue
             yield line
 
@@ -61,11 +70,8 @@ class Fileread(Pluginbase):
                     f.close()
                     break   # only executed when follow == false
                 except PluginError as e:
-                    if e.message == 'File has been moved.':
-                        f.close()
-                        self.logger.info(e.message)
-                    else:
-                        raise # future proof
+                    f.close()
+                    self.logger.info(e.message)
                 except FileNotFoundError as e:
                     self.logger.critical('File not found: %s' % e)
                     if int(self.retry_reopen) == 0 or reopen_tries > int(self.retry_reopen):
